@@ -1,0 +1,234 @@
+\documentclass{article}
+
+%\usepackage{caption}
+
+\renewcommand{\thesubsection}{\thesection.\alph{subsection}}
+
+\usepackage{graphicx}
+\usepackage{caption}
+\usepackage{float}
+\usepackage{amsmath}
+\usepackage{forest}
+\usepackage{multicol}
+\usepackage[margin=1.1in]{geometry}
+
+\usepackage{algorithm2e} %for psuedo code
+%\usepackage{vaucanson-g} % for FSM
+%\usepackage[pdf]{pstricks}
+
+\newenvironment{myenum}
+{ \begin{enumerate}
+    
+  \end{itemize} }
+
+
+
+\begin{document}
+\title{Comp 6721 - Artificial Intelligence - Project 2 project report}
+\author{Federico O'Reilly Regueiro - 40012304}
+\date{December 7th, 2016}
+\maketitle
+
+%------------------------ Q1 ------------------------%
+\section{}
+
+\begin{algorithm}[H] %or another one check
+ \caption{How to write algorithms}
+     \SetAlgoLined
+     \KwData{this text}
+     \KwResult{how to write algorithm with \LaTeX2e }
+     initialization\;
+     \While{not at end of this document}{
+      read current\;
+      \eIf{understand}{
+       go to next section\;
+       current section becomes this one\;
+       }{
+       go back to the beginning of current section\;
+      }
+     }
+\end{algorithm}
+     
+%------------------------ Q2 ------------------------%
+\section{Context free grammars for English}
+\subsection{sentences parsed by the given grammar}
+For the proposed grammar, a noun can be composed in two ways and is included twice in a sentence. Thus, the given grammar could parse/generate $2\times2 = 4$ sentences:
+\begin{itemize}
+\setlength{\itemsep}{0pt}
+	\setlength{\parskip}{0pt}
+    	\setlength{\parsep}{0pt} 
+	\item{the computer crashes the computer}
+	\item{the computer crashes the program}
+	\item{the program crashes the computer}
+	\item{the program crashes the program}	
+\end{itemize}
+\subsection{enhance the grammar to parses/generates NPs with modifiers}
+By modifying rules 1 and 2, the grammar could parse sentences such as \textit{the bad program that crashes the computer}.
+The necessary modifications are listed below. 
+	\renewcommand{\labelenumi}{\roman{enumi}}   
+\begin{enumerate}
+	\setlength{\itemsep}{0pt}
+	\setlength{\parskip}{0pt}
+    	\setlength{\parsep}{0pt} 
+	\item{\makebox[2cm]{sentence\hfill}$\longrightarrow$ np vp $|$ np compl vp}
+	\item{\makebox[2cm]{np\hfill}$\longrightarrow$ det noun $|$ det adj noun}
+	\item{\makebox[2cm]{vp\hfill}$\longrightarrow$ verb np}
+	\item{\makebox[2cm]{noun\hfill}$\longrightarrow$ computer $|$ program}
+	\item{\makebox[2cm]{verb\hfill}$\longrightarrow$ crashes}
+	\item{\makebox[2cm]{det\hfill}$\longrightarrow$ the}
+	\item{\makebox[2cm]{adj\hfill}$\longrightarrow$ fast $|$ bad}
+	\item{\makebox[2cm]{compl\hfill}$\longrightarrow$ that}
+\end{enumerate}
+The series of parsed/generated sentences grows considerably, since we can now generate sentences in two different ways and nouns in $2\times 3 = 6$ ways. Since we have two nouns in the sentence then we have $2\times 2 \times 3 \times 2 \times 3 = 72$ sentences: 
+\begin{multicols}{2}
+\renewcommand\labelitemi{}
+\begin{itemize}
+	\setlength{\itemsep}{0pt}
+	\setlength{\parskip}{0pt}
+    	\setlength{\parsep}{0pt} 
+    	    	\small{
+	\item{the computer crashes the computer}
+	\item{the computer crashes the program}
+	\item{the program crashes the computer}
+	\item{the program crashes the program}
+	\item{}
+	\item{the computer that crashes the computer}
+	\item{the computer that crashes the program}
+	\item{the program that crashes the computer}
+	\item{the program that crashes the program}	
+	\item{}	
+	\item{the fast computer crashes the computer}
+	\item{the fast computer crashes the program}
+	\item{the fast program crashes the computer}
+	\item{the fast program crashes the program}
+	\item{}	
+	\item{the fast computer that crashes the computer}
+	\item{the fast computer that crashes the program}
+	\item{the fast program that crashes the computer}
+	\item{the fast program that crashes the program}	
+	\item{}	
+	\item{the bad computer crashes the computer}
+	\item{the bad computer crashes the program}
+	\item{the bad program crashes the computer}
+	\item{the bad program crashes the program}
+	\item{}	
+	\item{the bad computer that crashes the computer}
+	\item{the bad computer that crashes the program}
+	\item{the bad program that crashes the computer}
+	\item{the bad program that crashes the program}	
+	%------------------%
+	\item{}
+	\item{the computer crashes the fast computer}
+	\item{the computer crashes the fast program}
+	\item{the program crashes the fast computer}
+	\item{the program crashes the fast program}
+	\item{}	
+	\item{the computer that crashes the fast computer}
+	\item{the computer that crashes the fast program}
+	\item{the program that crashes the fast computer}
+	\item{the program that crashes the fast program}	
+	\item{}	
+	\item{the fast computer crashes the fast computer}
+	\item{the fast computer crashes the fast program}
+	\item{the fast program crashes the fast computer}
+	\item{the fast program crashes the fast program}
+	\item{}	
+	\item{the fast computer that crashes the fast computer}
+	\item{the fast computer that crashes the fast program}
+	\item{the fast program that crashes the fast computer}
+	\item{the fast program that crashes the fast program}	
+	\item{}	
+	\item{the bad computer crashes the fast computer}
+	\item{the bad computer crashes the fast program}
+	\item{the bad program crashes the fast computer}
+	\item{the bad program crashes the fast program}
+	\item{}	
+	\item{the bad computer that crashes the fast computer}
+	\item{the bad computer that crashes the fast program}
+	\item{the bad program that crashes the fast computer}
+	\item{the bad program that crashes the fast program}	
+	%------------------%
+	\item{}
+	\item{the computer crashes the bad computer}
+	\item{the computer crashes the bad program}
+	\item{the program crashes the bad computer}
+	\item{the program crashes the bad program}
+	\item{}	
+	\item{the computer that crashes the bad computer}
+	\item{the computer that crashes the bad program}
+	\item{the program that crashes the bad computer}
+	\item{the program that crashes the bad program}	
+	\item{}	
+	\item{the fast computer crashes the bad computer}
+	\item{the fast computer crashes the bad program}
+	\item{the fast program crashes the bad computer}
+	\item{the fast program crashes the bad program}
+	\item{}	
+	\item{the fast computer that crashes the bad computer}
+	\item{the fast computer that crashes the bad program}
+	\item{the fast program that crashes the bad computer}
+	\item{the fast program that crashes the bad program}	
+	\item{}	
+	\item{the bad computer crashes the bad computer}
+	\item{the bad computer crashes the bad program}
+	\item{the bad program crashes the bad computer}
+	\item{the bad program crashes the bad program}
+	\item{}	
+	\item{the bad computer that crashes the bad computer}
+	\item{the bad computer that crashes the bad program}
+	\item{the bad program that crashes the bad computer}
+	\item{the bad program that crashes the bad program}	
+	\item{} 
+		} % end small
+\end{itemize}
+\end{multicols}
+
+TODO now list what should be avoided or what should be added.
+%------------------------ Q3 ------------------------%
+\section{}
+
+%------------------------ Q4 ------------------------%
+\section{Decission tree}
+From the table we are given, we can derive the entropy of our observations for the two possible outcomes $sunburnt = \{0,1\}$ .
+\[
+H[sunburnt] = -\frac{3}{8}log_2(\frac{3}{8}) -\frac{5}{8}log_2(\frac{5}{8}) = 0.954434002924965
+\]
+Information gain, $IG(x, y) = H[x] - \sum_y p(y)H[x|y]$ requires calculating conditional entropies given each one of the features.
+For names, since we have no repeated names, each name is associated with a single outcome, which implies that the entropy of sunburnt \emph{given} a certain name will be 0 for these observations.
+\begin{equation*}
+\begin{aligned}
+H[sunburnt | Name] =& \sum\limits_n p(sunburnt|Name=n)H[sunburnt|Name=n]\\
+                                 =& \sum\limits_n \frac{1}{8} \cdot 0\\
+IG(sunburnt, Name) =& H[sunburnt] - 0 = 0.954434002924965
+\end{aligned}
+\end{equation*}
+Which would make $Name$ an obvious choice for the tree given the sole $IG$ criterion for deciding since we cannot have a higher information gain.
+
+\begin{forest} [Name 
+						[Sarah [\textit{sunburned} ]]
+		               		[Dana  [\textit{none} ]]
+           		    		[Alex   [\textit{none} ]]
+               				[Annie [\textit{sunburned} ]]
+               				[Emily  [\textit{sunburned} ]]
+              		 		[Pete   [\textit{none} ]]
+               				[John  [\textit{none} ]]
+               				[Katie  [\textit{none} ]]
+				]
+\end{forest}
+It must be noted, however, that yielding one leaf per observation is generally due to a poor choice of feature leading
+ to overfitting, and representative of the high variance typical of decision trees. This decision tree does not generalize well.
+%------------------------ Q5 ------------------------%
+\section{Genetic Algorithms}
+\subsection{defining a gene representation}
+Use a string of 5 hexadecimal digits, a sign and an exponent. Placing the exponent on one side and the sign on the other
+would give these two elements some positional independence
+
+\subsection{fitness function}
+
+\subsection{crossover and mutation - 2 generations for a small initial population of 3}
+
+\subsection{explain the state space - convergence?}
+
+\subsection{how might GA's solve this? Preferable to brute force search?}
+
+\end{document} 
