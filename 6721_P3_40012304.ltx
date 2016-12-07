@@ -11,17 +11,12 @@
 \usepackage{forest}
 \usepackage{multicol}
 \usepackage[margin=1.1in]{geometry}
+\usepackage{cancel}
+\usepackage{tabularx}
 
 \usepackage{algorithm2e} %for psuedo code
 %\usepackage{vaucanson-g} % for FSM
 %\usepackage[pdf]{pstricks}
-
-\newenvironment{myenum}
-{ \begin{enumerate}
-    
-  \end{itemize} }
-
-
 
 \begin{document}
 \title{Comp 6721 - Artificial Intelligence - Project 2 project report}
@@ -30,25 +25,204 @@
 \maketitle
 
 %------------------------ Q1 ------------------------%
-\section{}
+\section{Goal-stack planning}
+\subsection{problems with the representation?}
+$MOVE(B,A,Table)$ collides with $MOVE-TO-TABLE(B, A)$ and generates an inconsistent knowledge-base as well as
+having silly preconditions such as $Clear(Table)$ which could potentially make it impossible to move a block from the 
+$Table$ and place it atop another block. Additionally, $MOVE(B, C, C)$  could display inconsistent behavior.
 
-\begin{algorithm}[H] %or another one check
- \caption{How to write algorithms}
-     \SetAlgoLined
-     \KwData{this text}
-     \KwResult{how to write algorithm with \LaTeX2e }
-     initialization\;
-     \While{not at end of this document}{
-      read current\;
-      \eIf{understand}{
-       go to next section\;
-       current section becomes this one\;
-       }{
-       go back to the beginning of current section\;
-      }
-     }
-\end{algorithm}
-     
+The table can hold many  blocks and therefore should be treated differently from blocks.
+So another problem stems from the fact that  the predicate $On(x)$ should not take $Table$, instead, we need another 
+predicate $OnTable(x)$ as well as an operation to move a block from the table atop another empty block, a predicate $Block(x)$ 
+that becomes a precondition to $Move(b, x, y)$ (added preconditions: $Block(x) \land Block(y)$ and $\lnot(x = y)$).
+
+\subsection{Demonstrate goal-stack planning}
+%\begin{multicols}{2}
+\begin{enumerate}
+	\setlength{\itemsep}{0pt}
+	\setlength{\parskip}{0pt}
+   	\setlength{\parsep}{0pt} 
+   	
+	\item{\begin{tabularx}{\textwidth}{ X X X } 
+		\textbf{goal-stack} & \textbf{popped} & \textbf{KB}\\  	
+		$OnTable(A)$ 	& 							& $On(B, C)$\\  	
+		$On(B,A)$		& 							& $OnTable(A)$\\	
+		$On(C,B)$		& 							& $Clear(B)$\\					
+		 					& 							& $Clear(A)$\\
+		 					& 							& $OnTable(C)$\\
+	\end{tabularx}}
+	\item{\begin{tabularx}{\textwidth}{ X X X }  
+		\textbf{goal-stack} & \textbf{popped} & \textbf{KB}\\  	
+		 					& $OnTable(A)$			& $On(B, C)$\\  	
+		$On(B,A)$		& 							& $OnTable(A)$\\	
+		$On(C,B)$		& 							& $Clear(B)$\\					
+		 					& 							& $Clear(A)$\\
+		 					& 							& $OnTable(C)$\\		 					
+	\end{tabularx}}
+	\item{\begin{tabularx}{\textwidth}{ X X X }  
+		\textbf{goal-stack} & \textbf{popped} & \textbf{KB}\\  	
+		 $MOVE(B, C, A)$& 							& $On(B, C)$\\  	
+		$On(B,A)$		& 							& $OnTable(A)$\\	
+		$On(C,B)$		& 							& $Clear(B)$\\					
+		 					& 							& $Clear(A)$\\
+		 					& 							& $OnTable(C)$\\		 							
+	\end{tabularx}}
+	\item{\begin{tabularx}{\textwidth}{ X X X }  
+		\textbf{goal-stack} & \textbf{popped} & \textbf{KB}\\  	
+		 $On(B,C)$		& 							& $On(B, C)$\\  	
+		 $Clear(A)$		& 							& $OnTable(A)$\\	
+		 $Clear(B)$		& 							& $Clear(B)$\\					
+		 $MOVE(B, C, A)$& 							& $Clear(A)$\\		
+		 $On(B,A)$		& 							& $OnTable(C)$\\	
+		 $On(C,B)$		& 							& \\			 							 					
+	\end{tabularx}}
+	\item{\begin{tabularx}{\textwidth}{ X X X }  
+		\textbf{goal-stack} & \textbf{popped} & \textbf{KB}\\  	
+		$Move(B, C, A)$& 	$On(B,C)$			& $On(B, C)$\\  	
+		$On(B,A)$		& 	$Clear(A)$			& $OnTable(A)$\\	
+		$On(C,B)$		& 	$Clear(B)$			& $Clear(B)$\\					
+		 					& 							& $Clear(A)$\\	
+		 					& 							& $OnTable(C)$\\		 						
+	\end{tabularx}}
+	\item{\begin{tabularx}{\textwidth}{ X X X }  
+		\textbf{goal-stack} & \textbf{popped} & \textbf{KB}\\  	
+		 					& 	$MOVE(B, C, A)$	& $\cancel{On(B, C)}$\\  	
+		$On(B,A)$		& 							& $OnTable(A)$\\	
+		$On(C,B)$		& 							& $Clear(B)$\\					
+		 					& 							& $\cancel{Clear(A)}$\\		
+		 					& 							& $On(B, A)$\\		 					
+		 					& 							& $Clear(C)$\\
+		 					& 							& $OnTable(C)$\\		 					
+	\end{tabularx}}
+	\item{\begin{tabularx}{\textwidth}{ X X X }  
+		\textbf{goal-stack} & \textbf{popped} & \textbf{KB}\\  	
+		 $MOVE(C, Table, B)$& $On(B,A)$		& $Clear(C)$\\  	
+		$On(C,B)$		& 							& $OnTable(A)$\\	
+							& 							& $Clear(B)$\\					
+		 					& 							& $On(B, A)$\\	
+		 					& 							& $OnTable(C)$\\		 						
+	\end{tabularx}}
+	\item{\begin{tabularx}{\textwidth}{ X X X }  
+		\textbf{goal-stack} & \textbf{popped} & \textbf{KB}\\  	
+		$OnTable(C)$	& 							& $Clear(C)$\\  	
+		$Clear(C)$		& 							& $OnTable(A)$\\	
+		$Clear(B)$		& 							& $Clear(B)$\\					
+		$MOVE(C, Table, A)$&						& $On(B, A)$\\	
+		$On(C,B)$		& 							& $OnTable(C)$\\		 						
+	\end{tabularx}}
+	\item{\begin{tabularx}{\textwidth}{ X X X }   
+		\textbf{goal-stack} & \textbf{popped} & \textbf{KB}\\  	
+		 $MOVE(C, Table, B)$& $OnTable(C)$	& $Clear(C)$\\  	
+		$On(C,B)$		&        $Clear(C)$		& $OnTable(A)$\\	
+							& 		$Clear(B)$		& $Clear(B)$\\					
+		 					& 							& $On(B, A)$\\	
+		 					& 							& $OnTable(C)$\\		 						
+	\end{tabularx}}
+	\item{\begin{tabularx}{\textwidth}{ X X X }  
+		\textbf{goal-stack} & \textbf{popped} & \textbf{KB}\\  	
+		$On(C,B)$ 		&$MOVE(C, Table, B)$	& $Clear(C)$\\  	
+							&       						& $OnTable(A)$\\	
+							& 							& $\cancel{Clear(B)}$\\					
+		 					& 							& $On(B, A)$\\	
+		 					& 							& $\cancel{OnTable(C)}$\\		 						
+		 					& 							& $On(C,B)$\\
+		 					& 							& $Clear(Table)!$\\		 							 					
+	\end{tabularx}}
+	\item{\begin{tabularx}{\textwidth}{ X X X }  
+		\textbf{goal-stack} & \textbf{popped} & \textbf{KB}\\  	
+		$Done!$			&$On(C, B)$				& $Clear(C)$\\  	
+							&       						& $OnTable(A)$\\	
+							& 							& $On(C, B)$\\					
+		 					& 							& $On(B, A)$\\	
+		 					& 							& $Clear(Table)$\\		 						
+	\end{tabularx}}
+\end{enumerate}
+%\end{multicols}
+\clearpage
+\subsection{Demonstrate the Sussman Anomaly}
+There are three ways of ordering the sub-goals $On(A, B), On(B, C), OnTable(C)$ in this scenario which could cause
+Sussman's Anomaly:
+
+\begin{tabularx}{\textwidth}{ X X X } 
+$On(B, C)$  		&  $On(B, C)$  		& $OnTable(C)$ \\
+$OnTable(C)$  	&  $On(A, B)$  		& $On(A, B)$ \\
+$On(A, B)$  		&  $OnTable(C)$  	& $On(B, C)$ \\
+\end{tabularx}
+
+An illustration of the first of these stacks follows:
+
+\begin{enumerate}
+	\setlength{\itemsep}{0pt}
+	\setlength{\parskip}{0pt}
+   	\setlength{\parsep}{0pt} 
+	\item{\begin{tabularx}{\textwidth}{ X X X } 
+		\textbf{goal-stack} & \textbf{popped} & \textbf{KB}\\  	
+		$On(B, C)$ 		& 							& $On(C, A)$\\  	
+		$OnTable(C)$	& 							& $OnTable(A)$\\	
+		$On(A, B)$		& 							& $OnTable(B)$\\					
+		 					& 							& $Clear(B)$\\
+		 					& 							& $Clear(C)$\\
+	\end{tabularx}}
+	\item{\begin{tabularx}{\textwidth}{ X X X } 
+		\textbf{goal-stack} & \textbf{popped} & \textbf{KB}\\  	
+	$MOVE(B, Table, C)$& 							& $On(C, A)$\\  	
+		$On(B, C)$		& 							& $OnTable(A)$\\	
+		$OnTable(C)$	& 							& $OnTable(B)$\\					
+		$On(A, B)$		& 							& $Clear(B)$\\
+		 					& 							& $Clear(C)$\\
+	\end{tabularx}}
+	\item{\begin{tabularx}{\textwidth}{ X X X }  
+		\textbf{goal-stack} & \textbf{popped} & \textbf{KB}\\  	
+		$Clear(B)$		& 							& $On(C, A)$\\  	
+		$Clear(C)$		& 							& $OnTable(A)$\\	
+		$OnTable(B)$	& 							& $OnTable(B)$\\					
+	$MOVE(B, Table, C)$& 							& $Clear(B)$\\
+		 $On(B, C)$		& 							& $Clear(C)$\\	
+		 $OnTable(C)$	& 							& \\
+		$On(A, B)$		& 							& \\		 					
+	\end{tabularx}}
+	\item{\begin{tabularx}{\textwidth}{ X X X } 
+		\textbf{goal-stack} & \textbf{popped} & \textbf{KB}\\  	
+	$MOVE(B, Table, C)$& 		$OnTable(B)$	& $On(C, A)$\\  	
+		$On(B, C)$		& 		$Clear(C)$		& $OnTable(A)$\\	
+		$OnTable(C)$	& 		$Clear(B)$		& $OnTable(B)$\\					
+		$On(A, B)$		& 							& $Clear(B)$\\
+		 					& 							& $Clear(C)$\\
+	\end{tabularx}}
+	\item{\begin{tabularx}{\textwidth}{ X X X } 
+		\textbf{goal-stack} & \textbf{popped} & \textbf{KB}\\  	
+		$On(B, C)$		& $MOVE(B, Table, C)$	& $On(C, A)$\\  	
+		$OnTable(C)$	& 							& $OnTable(A)$\\	
+		$On(A, B)$		& 							& $\cancel{OnTable(B)}$\\					
+							& 							& $Clear(B)$\\
+		 					& 							& $\cancel{Clear(C)}$\\
+		 					& 							& $On(B, C)$\\		 					
+	\end{tabularx}}
+	\item{\begin{tabularx}{\textwidth}{ X X X } 
+		\textbf{goal-stack} & \textbf{popped} & \textbf{KB}\\  	
+		$OnTable(C)$	& 		$On(B, C)$		& $On(C, A)$\\  	
+		$On(A, B)$		& 							&  $On(B, C)$\\
+							& 							& $OnTable(A)$\\					
+							& 							& $Clear(B)$\\ 					
+	\end{tabularx}}
+	\item{\begin{tabularx}{\textwidth}{ X X X } 
+		\textbf{goal-stack} & \textbf{popped} & \textbf{KB}\\  	
+$MOVE-TO-TABLE(C)$	& 							& $On(C, A)$\\  	
+		$OnTable(C)$	& 							&  $On(B, C)$\\
+		$On(A, B)$		& 							& $OnTable(A)$\\					
+							& 							& $Clear(B)$\\ 					
+	\end{tabularx}}
+	\item{\begin{tabularx}{\textwidth}{ X X X } 
+		\textbf{goal-stack} & \textbf{popped} & \textbf{KB}\\  	
+		$Clear(C)$		& 							& $On(C, A)$\\  	
+		$On(C, A)$		& 							&  $On(B, C)$\\
+$MOVE-TO-TABLE(C, A)$& 						& $OnTable(A)$\\					
+		$OnTable(C)$	& 							& $Clear(B)$\\ 					
+		$On(A, B)$		& 							& \\ 								
+	\end{tabularx}}
+\end{enumerate}
+And now we can't proceed with the second sub-goal without undoing the first (which is no longer on the stack)!
+
 %------------------------ Q2 ------------------------%
 \section{Context free grammars for English}
 \subsection{sentences parsed by the given grammar}
@@ -182,10 +356,113 @@ The series of parsed/generated sentences grows considerably, since we can now ge
 		} % end small
 \end{itemize}
 \end{multicols}
+Out of all these syntactically correct sentences, there are several which make little sense. Although a faulty computer
+ might cause a program to crash, this is not generally understood to be the case. Also, potentially one computer 
+might crash another computer\footnote{\ldots by running a red light. Sorry, couldn't help it.} in some form of networked
+ situation, in general it is programs that crash computers or maybe even other programs running synchronously. However,
+ in the case of a program crashing \emph{another} program, we would generally require some specifier to distinguish 
+ between programs (eg `this program crashed the other program'). 
+ 
+ Another thing that makes little sense is qualifying a computer as `bad', where it makes perfect sense for a program (specially 
+ one that causes computers to crash.
+ 
+ This leaves only a small subset of the language that really makes sense:
+ \begin{multicols}{2}
+\renewcommand\labelitemi{}
+ \begin{itemize}
+	\setlength{\itemsep}{0pt}
+	\setlength{\parskip}{0pt}
+    	\setlength{\parsep}{0pt} 
+    	    	\small{
+ 	\item{the program crashes the computer}
+	\item{the program crashes the fast computer}
+	\item{the program that crashes the computer}
+	\item{the program that crashes the fast computer}
+	\item{the bad program crashes the computer}
+	\item{the bad program crashes the fast computer}
+	\item{the bad program that crashes the computer}
+	\item{the bad program that crashes the fast computer}
+	\item{the fast program crashes the computer}
+	\item{the fast program crashes the fast computer}
+	\item{the fast program that crashes the computer}
+	\item{the fast program that crashes the fast computer}
+	} % end small
+\end{itemize}
+\end{multicols}
 
-TODO now list what should be avoided or what should be added.
+\clearpage
+
+The necessary modifications could easily be made  by using a context-sensitive grammar but are not as natural 
+to a context-free grammar.
+ \begin{enumerate}
+	\setlength{\itemsep}{0pt}
+	\setlength{\parskip}{0pt}
+    	\setlength{\parsep}{0pt} 
+	\item{\makebox[3cm]{sentence\hfill}$\longrightarrow$ np vp $|$ np compl vp}
+	\item{\makebox[3cm]{np\hfill}$\longrightarrow$ det noun $|$ det adj noun}
+	\item{\makebox[3cm]{vp\hfill}$\longrightarrow$ verb np}
+	\item{\makebox[3cm]{noun vp\hfill}$\longrightarrow$ program vp}
+	\item{\makebox[3cm]{adj noun vp\hfill}$\longrightarrow$ bad program vp $|$ fast program vp}
+	\item{\makebox[3cm]{verb det noun\hfill}$\longrightarrow$ verb det computer}
+	\item{\makebox[3cm]{verb det adj noun\hfill}$\longrightarrow$ verb det fast computer}
+	\item{\makebox[3cm]{verb\hfill}$\longrightarrow$ crashes}
+	\item{\makebox[3cm]{det\hfill}$\longrightarrow$ the}
+	\item{\makebox[3cm]{compl\hfill}$\longrightarrow$ that}
+\end{enumerate}
+
+Where in a context-free grammar we would have to use something like the following grammar, which can quickly 
+become unwieldy:
+	\renewcommand{\labelenumi}{\roman{enumi}}   
+\begin{enumerate}
+	\setlength{\itemsep}{0pt}
+	\setlength{\parskip}{0pt}
+    	\setlength{\parsep}{0pt} 
+	\item{\makebox[2cm]{sentence\hfill}$\longrightarrow$ np vp $|$ np compl vp}
+	\item{\makebox[2cm]{np\hfill}$\longrightarrow$ det noun $|$ det adj noun}
+	\item{\makebox[2cm]{vp\hfill}$\longrightarrow$ verb det obj $|$ verb det obj-adj obj}
+	\item{\makebox[2cm]{noun\hfill}$\longrightarrow$ program}
+	\item{\makebox[2cm]{obj\hfill}$\longrightarrow$ computer}
+	\item{\makebox[2cm]{verb\hfill}$\longrightarrow$ crashes}
+	\item{\makebox[2cm]{det\hfill}$\longrightarrow$ the}
+	\item{\makebox[2cm]{adj\hfill}$\longrightarrow$ fast $|$ bad}
+	\item{\makebox[2cm]{obj-adj\hfill}$\longrightarrow$ fast}
+	\item{\makebox[2cm]{compl\hfill}$\longrightarrow$ that}
+\end{enumerate}
+ 
 %------------------------ Q3 ------------------------%
-\section{}
+\section{A*}
+\subsection{BFS expansion}
+\renewcommand\labelitemi{}
+\begin{itemize}
+	\setlength{\itemsep}{0pt}
+	\setlength{\parskip}{0pt}
+    	\setlength{\parsep}{0pt} 
+	\item{\makebox[4cm]{\textbf{closed list}\hfill}\textbf{open list}}
+	\item{\makebox[4cm]{\hfill}S-11}
+	\item{\makebox[4cm]{S\hfill}D-8.9, A-10.4}	
+	\item{\makebox[4cm]{SD\hfill}E-6.9, A-10.4}
+	\item{\makebox[4cm]{SDE\hfill}F-3, B-6.7, A-10.4}
+	\item{\makebox[4cm]{SDEF\hfill}G-0, B-6.7, A-10.4}
+	\item{\makebox[4cm]{SDEFG\hfill}B-6.7, A-10.4 --- \textbf{Done!}} 
+\end{itemize}
+
+
+\subsection{A* expansion}
+\renewcommand\labelitemi{}
+\begin{itemize}
+	\setlength{\itemsep}{0pt}
+	\setlength{\parskip}{0pt}
+    	\setlength{\parsep}{0pt} 
+	\item{\makebox[4cm]{\textbf{closed list}\hfill}\makebox[2cm]{\textbf{accrued}\hfill}\textbf{open list}}
+	\item{\makebox[4cm]{\hfill}\makebox[2cm]{0\hfill}S-11+0}
+	\item{\makebox[4cm]{S\hfill}\makebox[2cm]{0\hfill}D-8.9+4, A-10.4+3}	
+	\item{\makebox[4cm]{SD\hfill}\makebox[2cm]{4\hfill}E-6.9+6, A-10.4+3}
+	\item{\makebox[4cm]{SDE\hfill}\makebox[2cm]{6\hfill}F-3+10, A-10.4+3, B-6.7+11}
+	\item{\makebox[4cm]{SDEF\hfill}\makebox[2cm]{10\hfill}G-0+13, A-10.4+3, B-6.7+11}
+	\item{\makebox[4cm]{SDEFG\hfill}\makebox[2cm]{13\hfill}A-10.4+3, B-6.7+11 --- \textbf{Done!}} 
+\end{itemize}
+
+
 
 %------------------------ Q4 ------------------------%
 \section{Decission tree}
@@ -202,7 +479,7 @@ H[sunburnt | Name] =& \sum\limits_n p(sunburnt|Name=n)H[sunburnt|Name=n]\\
 IG(sunburnt, Name) =& H[sunburnt] - 0 = 0.954434002924965
 \end{aligned}
 \end{equation*}
-Which would make $Name$ an obvious choice for the tree given the sole $IG$ criterion for deciding since we cannot have a higher information gain.
+Which would make $Name$ an obvious choice for the tree, given the sole $IG$ criterion for deciding, since we have maximal information gain (which is not the case for any other feature).
 
 \begin{forest} [Name 
 						[Sarah [\textit{sunburned} ]]
@@ -220,7 +497,7 @@ It must be noted, however, that yielding one leaf per observation is generally d
 %------------------------ Q5 ------------------------%
 \section{Genetic Algorithms}
 \subsection{defining a gene representation}
-Use a string of 5 hexadecimal digits, a sign and an exponent. Placing the exponent on one side and the sign on the other
+Use a string of 4 hexadecimal digits, a sign and another hexadecimal digit with it's own sign as an exponent. Placing the exponent on one side and the sign on the other
 would give these two elements some positional independence
 
 \subsection{fitness function}
