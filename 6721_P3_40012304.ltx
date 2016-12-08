@@ -14,9 +14,29 @@
 \usepackage{cancel}
 \usepackage{tabularx}
 
-\usepackage{algorithm2e} %for psuedo code
-%\usepackage{vaucanson-g} % for FSM
-%\usepackage[pdf]{pstricks}
+\usepackage{listings}
+\usepackage{color}
+
+\definecolor{dkgreen}{rgb}{0,0.6,0}
+\definecolor{gray}{rgb}{0.5,0.5,0.5}
+\definecolor{mauve}{rgb}{0.58,0,0.82}
+
+\lstset{
+  language=Python,
+  aboveskip=3mm,
+  belowskip=3mm,
+  showstringspaces=false,
+  columns=flexible,
+  basicstyle={\small\ttfamily},
+  numbers=left,
+  numberstyle=\tiny\color{gray},
+  keywordstyle=\color{blue},
+  commentstyle=\color{dkgreen},
+  stringstyle=\color{mauve},
+  breaklines=true,
+  breakatwhitespace=true,
+  tabsize=4
+}
 
 \begin{document}
 \title{Comp 6721 - Artificial Intelligence - Project 2 project report}
@@ -237,8 +257,12 @@ For the proposed grammar, a noun can be composed in two ways and is included twi
 	\item{the program crashes the program}	
 \end{itemize}
 \subsection{enhance the grammar to parses/generates NPs with modifiers}
-By modifying rules 1 and 2, the grammar could parse sentences such as \textit{the bad program that crashes the computer}.
-The necessary modifications are listed below. 
+If we wanted to parse NPs that included a complement \emph{that}
+\footnote{ie. np $\rightarrow$ det noun $|$ det adj noun $|$ det noun compl $|$ det adj noun compl }, 
+we would run into all sorts of trouble by possibly generating/parsing sentences such as \textit{the program that crashes the computer that}.
+Instead, by modifying rules 1 and 2, the grammar could still parse sentences such as \textit{the bad program that 
+crashes the computer}.
+The necessary modifications are listed below.  
 	\renewcommand{\labelenumi}{\roman{enumi}}   
 \begin{enumerate}
 	\setlength{\itemsep}{0pt}
@@ -254,6 +278,8 @@ The necessary modifications are listed below.
 	\item{\makebox[2cm]{compl\hfill}$\longrightarrow$ that}
 \end{enumerate}
 The series of parsed/generated sentences grows considerably, since we can now generate sentences in two different ways and nouns in $2\times 3 = 6$ ways. Since we have two nouns in the sentence then we have $2\times 2 \times 3 \times 2 \times 3 = 72$ sentences: 
+\\
+
 \begin{multicols}{2}
 \renewcommand\labelitemi{}
 \begin{itemize}
@@ -468,7 +494,7 @@ become unwieldy:
 \section{Decission tree}
 From the table we are given, we can derive the entropy of our observations for the two possible outcomes $sunburnt = \{0,1\}$ .
 \[
-H[sunburnt] = -\frac{3}{8}log_2(\frac{3}{8}) -\frac{5}{8}log_2(\frac{5}{8}) = 0.954434002924965
+H[sunburnt] = -\frac{3}{8}log_2(\frac{3}{8}) -\frac{5}{8}log_2(\frac{5}{8}) = 0.95443
 \]
 Information gain, $IG(x, y) = H[x] - \sum_y p(y)H[x|y]$ requires calculating conditional entropies given each one of the features.
 For names, since we have no repeated names, each name is associated with a single outcome, which implies that the entropy of sunburnt \emph{given} a certain name will be 0 for these observations.
@@ -480,6 +506,7 @@ IG(sunburnt, Name) =& H[sunburnt] - 0 = 0.954434002924965
 \end{aligned}
 \end{equation*}
 Which would make $Name$ an obvious choice for the tree, given the sole $IG$ criterion for deciding, since we have maximal information gain (which is not the case for any other feature).
+\\
 
 \begin{forest} [Name 
 						[Sarah [\textit{sunburned} ]]
@@ -492,20 +519,164 @@ Which would make $Name$ an obvious choice for the tree, given the sole $IG$ crit
                				[Katie  [\textit{none} ]]
 				]
 \end{forest}
+\\
+
 It must be noted, however, that yielding one leaf per observation is generally due to a poor choice of feature leading
  to overfitting, and representative of the high variance typical of decision trees. This decision tree does not generalize well.
+ 
+ If, however, we decided to go with the next-highest information gain, Then we would need to compare information gains for
+  other features. Firstly hair, out of 8 observations there are 4 blondes, 3 brown-haired and 1 red-haired. From the 4 blondes, 
+  half were sunburnt, half were not. For both brown-haired and red-haired, entropy is $0$ since they each represent a single 
+  class.
+ \begin{equation*}
+\begin{aligned}
+H[sb | Hr] =& \sum\limits_h p(sb|Hr=h)H[sb|Hr=h]\\
+                                 =& p(sb|Hr=bl)H[sb|Hr=bl] + p(sb|Hr=r)H[sb|Hr=r]
+                                 + p(sb|Hr=br)H[sb|Hr=br]\\
+                                 =& -\frac{1}{2} \cdot \cancel{2 \cdot \frac{1}{2}}log_2\left(\frac{1}{2}\right) + 0 + 0\\
+                                 =& 0.5\\
+	IG(sb, Hr) =& H[sb] - 0.5 = 0.45443
+\end{aligned}
+\end{equation*}
+Considering height, there are average, tall and short people in the observations. Out of 3 average subjects, 2 were sunburned.
+There were 2 tall, none sunburned and 3 short of whom 1 was sunburned.
+ \begin{equation*}
+\begin{aligned}
+H[sb | Ht] =& \sum\limits_ht p(sb|Ht=ht)H[sb|Ht=ht]\\
+                                 =& p(sb|Ht=avg)H[sb|Ht=avg] + p(sb|Ht=t)H[sb|Ht=t]
+                                 + p(sb|Ht=sh)H[sb|Ht=sh]\\
+                                 =& -2 \cdot \frac{3}{8} \cdot  \left( \frac{2}{3}log_2\left(\frac{2}{3}\right) 
+                                 + \frac{1}{3}log_2\left(\frac{1}{3}\right) \right)
+                                 + 0\\
+                                 =& 0.34436\\
+	IG(sb, Ht) =& H[sb] - 0.68872 =0.26571
+\end{aligned}
+\end{equation*}
+Considering weight, there are average, heavy and light people in the observations. Out of 3 average subjects, 1 was
+ sunburned. From the 2 light, 1 was sunburned and from the 3 heavy, 1 was sunburned.
+ \begin{equation*}
+\begin{aligned}
+H[sb | W] =& \sum\limits_w p(sb|W=w)H[sb|W=w]\\
+                                 =& p(sb|W=avg)H[sb|W=avg] + p(sb|W=h)H[sb|W=h]
+                                 + p(sb|W=l)H[sb|W=l]\\
+                                 =& -2 \cdot \frac{3}{8} \cdot  \left( \frac{2}{3}log_2\left(\frac{2}{3}\right) 
+                                 + \frac{1}{3}log_2\left(\frac{1}{3}\right) \right)
+                                 + \left( -\frac{2}{8} \cdot \cancel{2 \cdot \frac{1}{2}}log_2\left(\frac{1}{2}\right) \right)\\
+                                 =& 0.93872\\
+	IG(sb, W) =& H[sb] - 0.93872 = 0.01571
+\end{aligned}
+\end{equation*}
+Considering the use of lotion, 3 people used lotion and were not sunburned, having an entropy of 0. Out of the remaining 5 subjects, 3 were
+ sunburned and 2 were not.
+ \begin{equation*}
+\begin{aligned}
+H[sb | L] =& \sum\limits_w p(sb|L=l)H[sb|L=l]\\
+                                 =& p(sb|L=y)H[sb|L=y] + p(sb|L=n)H[sb|L=n]\\
+                                 =& -\frac{5}{8} \cdot  \left( \frac{2}{5}log_2\left(\frac{2}{5}\right) 
+                                 + \frac{3}{5}log_2\left(\frac{3}{5}\right) \right)\\
+                                 =&0.60684\\
+	IG(sb, L) =& H[sb] - 0.60684 =0.34758
+\end{aligned}
+\end{equation*}
+
+From which we see that hair color is a good discriminant for being sunburned. Brown-haired and red-haired have 0 entropy and
+blonds have 2 cases of sunburns. Quickly checking the features, we can see that the use of lotion as a second decision 
+correctly classifies all cases, having the highest information gain, since other features do not have total information gain.
+The tree, therefore, would end up like this:
+\\
+\begin{center}
+\begin{forest} [Hair
+						[Blond [Lotion?
+							[N - \textit{sunburned} ]
+							[Y - \textit{none} ]]]
+		               		[Red  [\textit{Sunburned} ]]
+           		    		[Brown   [\textit{none} ]]
+				]
+\end{forest}
+\end{center}
+\clearpage
+
 %------------------------ Q5 ------------------------%
 \section{Genetic Algorithms}
+I have actually implemented this out of curiosity and have included it at the end of this assignment as well as the code.
 \subsection{defining a gene representation}
-Use a string of 4 hexadecimal digits, a sign and another hexadecimal digit with it's own sign as an exponent. Placing the exponent on one side and the sign on the other
-would give these two elements some positional independence
+We propose using 5 hexadecimal digits, in the form $a^n + b \sqrt{c^m}, \mid a, b, m, n \in \{-15, -14, \ldots 14, 15\}, c \in \{0, 1,\ldots 15\}$. Internally, it is essentially a list \texttt{(a, b, c, m, n)}.
 
 \subsection{fitness function}
+The fitness function could be $\frac{1}{l}$ where for the number $\hat{x}$ resulting from the expansion of the model, and the 
+expression $f(x)=x^2 + 2x - 11$, we have $l = |f(x) - f(\hat{x})|$ or otherwise, simply $l = |f(\hat{x})|$. Instead of 
+implementing a fitness function, I have simply used the loss function.
 
-\subsection{crossover and mutation - 2 generations for a small initial population of 3}
+\subsection{crossover and mutation - 2 generations for a small initial population of 8}
+I have defined the behavior as follows:
+\begin{itemize}
+	\setlength{\itemsep}{0pt}
+	\setlength{\parskip}{0pt}
+    	\setlength{\parsep}{0pt} 
+	\item The population is constantly 8 models
+	\item The initial values of the first 8 models are chosen with uniform probability given respective range constraints\footnote{Additional constraints such as \texttt{if c == 0 then m = 1} to avoid divide-by-zero errors.}
+	\item The four fittest parents remain
+	\item The four pairs to be recombined are chosen randomly with repetition
+	\item For each offspring, $a, b, c$ are taken from $parent_1$ with added rounded-off $N(0, 2)$, constraining 
+	values to their respective range
+	\item For each offspring, $m, n$ are taken from $parent_2$ with added rounded-off $N(0, 2)$, constraining 
+	values to their respective range
+	\item $l$ is recomputed \ldots
+\end{itemize}
+
+Here are 8 models during 2 generations:
+\begin{verbatim}
+	1st generation	
+		(c^4) + 5*sqrt(7^0)					loss - 430230552.0
+		(f^3) + -9*sqrt(b^1)					loss - 11196710.344739685
+		(-6^4) + -f*sqrt(2^2)					loss - 1605277.0
+		(-8^2) + -b*sqrt(7^2)					loss - 184.0
+		(6^-3) + -6*sqrt(0^1)					loss - 10.990719307270233
+		(-b^2) + -d*sqrt(3^2)					loss - 6877.0
+		(b^0) + f*sqrt(8^2)					loss - 14872.0
+		(3^1) + b*sqrt(1^1)					loss - 213.0
+	2nd generation
+		(6^-3) + -6*sqrt(0^1)					loss -10.99071930727023
+		(-8^2) + -b*sqrt(7^2)					loss -184.0
+		(3^1) + b*sqrt(1^1)					loss -213.0
+		(-b^2) + -d*sqrt(3^2)					loss -6877.0
+		(-7^2) + -d*sqrt(9^3)					loss -91797.0
+		(3^3) + -8*sqrt(1^5)					loss -388.0	
+		(-d^3) + -f*sqrt(1^-2)					loss -4897357.		
+		(5^-3) + b*sqrt(1^2)					loss -132.192064
+\end{verbatim}
 
 \subsection{explain the state space - convergence?}
+The state space is comprised of the set of real numbers. The solution to the sample expression is actually an irrational number, 
+from which follows that the algorithm will not converge entirely since the computer's floating-point representation 
+cannot represent an irrational number, however the algorithm could tend to approximate this number quite well. I the 
+environment in which I ran this, it approximates to within slightly less than a loss of $1.78e-15$. Given this slack definition of convergence for the problem at hand, I ran the GA 16 times for the 16 times it converged in the number of iterations shown below.
+
+\begin{verbatim}
+	converged in  839
+	converged in  153
+	converged in  2570
+	converged in  169
+	converged in  32
+	converged in  23431
+	converged in  1639
+	converged in  308
+	converged in  159
+	converged in  2774
+	converged in  64
+	converged in  1609
+	converged in  1847
+	converged in  1395
+\end{verbatim}
 
 \subsection{how might GA's solve this? Preferable to brute force search?}
+A despite the one-dimensional solution to the problem, since we're trying to find something in an infinite space, a brute force
+search would be very difficult. We would need to \emph{tune} the brute-force search with the right parameters to make it work;
+essentially we have granularity, search-direction\footnote{Or an algorithm for jumping around in its stead.} and bounds that need to be decided; this could be seen like a 3 dimensional problem. With an informed search, this could be achieved very quickly, but a brute-force search could very well not converge. GA's are slower than a proper informed search but they tend to converge, as does this example, given the representational constraints; this makes them preferable to brute-force-search
+in itself. 
+
+\subsection{Appendix - code for \texttt{test\textunderscore gen.py}}
+
+\lstinputlisting[breaklines]{test_gen.py}
 
 \end{document} 
