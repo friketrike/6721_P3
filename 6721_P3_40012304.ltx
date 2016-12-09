@@ -491,18 +491,18 @@ become unwieldy:
 
 
 %------------------------ Q4 ------------------------%
-\section{Decission tree}
+\section{Decision tree}
 From the table we are given, we can derive the entropy of our observations for the two possible outcomes $sunburnt = \{0,1\}$ .
 \[
-H[sunburnt] = -\frac{3}{8}log_2(\frac{3}{8}) -\frac{5}{8}log_2(\frac{5}{8}) = 0.95443
+H[sunburned] = -\frac{3}{8}log_2(\frac{3}{8}) -\frac{5}{8}log_2(\frac{5}{8}) = 0.95443
 \]
 Information gain, $IG(x, y) = H[x] - \sum_y p(y)H[x|y]$ requires calculating conditional entropies given each one of the features.
-For names, since we have no repeated names, each name is associated with a single outcome, which implies that the entropy of sunburnt \emph{given} a certain name will be 0 for these observations.
+For names, since we have no repeated names, each name is associated with a single outcome, which implies that the entropy of sunburned \emph{given} a certain name will be 0 for these observations.
 \begin{equation*}
 \begin{aligned}
-H[sunburnt | Name] =& \sum\limits_n p(sunburnt|Name=n)H[sunburnt|Name=n]\\
+H[sunburned | Name] =& \sum\limits_n p(sunburned|Name=n)H[sunburned|Name=n]\\
                                  =& \sum\limits_n \frac{1}{8} \cdot 0\\
-IG(sunburnt, Name) =& H[sunburnt] - 0 = 0.954434002924965
+IG(sunburned, Name) =& H[sunburned] - 0 = 0.954434002924965
 \end{aligned}
 \end{equation*}
 Which would make $Name$ an obvious choice for the tree, given the sole $IG$ criterion for deciding, since we have maximal information gain (which is not the case for any other feature).
@@ -522,11 +522,11 @@ Which would make $Name$ an obvious choice for the tree, given the sole $IG$ crit
 \\
 
 It must be noted, however, that yielding one leaf per observation is generally due to a poor choice of feature leading
- to overfitting, and representative of the high variance typical of decision trees. This decision tree does not generalize well.
+ to over-fitting, and representative of the high variance typical of decision trees. This decision tree does not generalize well.
  
  If, however, we decided to go with the next-highest information gain, Then we would need to compare information gains for
-  other features. Firstly hair, out of 8 observations there are 4 blondes, 3 brown-haired and 1 red-haired. From the 4 blondes, 
-  half were sunburnt, half were not. For both brown-haired and red-haired, entropy is $0$ since they each represent a single 
+  other features. Firstly hair, out of 8 observations there are 4 blonds, 3 brown-haired and 1 red-haired. From the 4 blondes, 
+  half were sunburned, half were not. For both brown-haired and red-haired, entropy is $0$ since they each represent a single 
   class.
  \begin{equation*}
 \begin{aligned}
